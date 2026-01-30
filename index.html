@@ -116,9 +116,15 @@
             transform: translateY(-1px);
         }
 
-        .tag.active {
+        .tag.selected {
             background-color: var(--md-sys-color-primary);
             color: white;
+            border-color: var(--md-sys-color-primary);
+        }
+
+        .tag.selected:hover {
+            background-color: #c2185b;
+            border-color: #c2185b;
         }
 
         /* Middle - Book Reader */
@@ -868,28 +874,33 @@
             category.classList.toggle('collapsed');
         }
 
-        // Tag selection - Insert into chat input
+        // Tag selection - Insert into chat input and toggle selected state
         document.querySelectorAll('.tag').forEach(tag => {
             tag.addEventListener('click', function() {
                 const tagName = this.dataset.tag;
                 const chatInput = document.getElementById('chatInput');
                 const currentValue = chatInput.value;
+                const isSelected = this.classList.contains('selected');
                 
-                // Add hashtag to input
-                if (currentValue && !currentValue.endsWith(' ')) {
-                    chatInput.value = currentValue + ' #' + tagName + ' ';
+                // Toggle selected state
+                this.classList.toggle('selected');
+                
+                // Add or remove hashtag from input
+                if (!isSelected) {
+                    // Adding tag
+                    if (currentValue && !currentValue.endsWith(' ')) {
+                        chatInput.value = currentValue + ' #' + tagName + ' ';
+                    } else {
+                        chatInput.value = currentValue + '#' + tagName + ' ';
+                    }
                 } else {
-                    chatInput.value = currentValue + '#' + tagName + ' ';
+                    // Removing tag - remove this hashtag from the input
+                    const tagPattern = new RegExp('\\s*#' + tagName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\s*', 'g');
+                    chatInput.value = currentValue.replace(tagPattern, ' ').trim() + (currentValue ? ' ' : '');
                 }
                 
                 // Focus the input
                 chatInput.focus();
-                
-                // Visual feedback
-                this.classList.add('active');
-                setTimeout(() => {
-                    this.classList.remove('active');
-                }, 300);
             });
         });
 
