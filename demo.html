@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Romance Book Reader - Material Design 3</title>
+    
+    <!-- Material Design 3 -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --md-sys-color-primary: #d81b60;
+            --md-sys-color-surface: #fef7ff;
+            --md-sys-color-surface-variant: #f3edf7;
+            --md-sys-color-on-surface: #1d1b20;
+            --md-sys-color-on-surface-variant: #49454f;
+            --md-sys-color-outline: #79747e;
+            --md-sys-color-outline-variant: #cac4d0;
+            --md-sys-color-shadow: #000000;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 280px 1fr 350px;
+            height: 100vh;
+            gap: 0;
+        }
+
+        /* Left Sidebar - Tags */
+        .tags-sidebar {
+            background-color: var(--md-sys-color-surface-variant);
+            padding: 24px 16px;
+            overflow-y: auto;
+            border-right: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .tags-sidebar h2 {
+            font-size: 22px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .tag-category {
+            margin-bottom: 16px;
+        }
+
+        .tag-category-title {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 4px 0;
+        }
+
+        .tag-category-title:hover {
+            color: var(--md-sys-color-primary);
+        }
+
+        .tag-category-title .material-icons {
+            font-size: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        .tag-category.collapsed .tag-category-title .material-icons {
+            transform: rotate(-90deg);
+        }
+
+        .tag-category-content {
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .tag-category.collapsed .tag-category-content {
+            max-height: 0;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            margin: 3px 3px 3px 0;
+            border: 1.5px solid var(--md-sys-color-primary);
+            border-radius: 12px;
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            background-color: rgba(216, 27, 96, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .tag.active {
+            background-color: var(--md-sys-color-primary);
+            color: white;
+        }
+
+        /* Middle - Book Reader */
+        .book-reader {
+            background: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .book-spread {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            max-width: 900px;
+            width: 100%;
+            perspective: 1500px;
+        }
+
+        .book-page {
+            background: white;
+            padding: 40px 32px;
+            height: calc(100vh - 120px);
+            max-height: 800px;
+            min-height: 600px;
+            box-shadow: 
+                0 2px 8px rgba(0,0,0,0.1),
+                0 8px 24px rgba(0,0,0,0.08);
+            border-radius: 4px;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .book-page.left {
+            border-right: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .book-page.right {
+            border-left: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .page-number.left {
+            left: 32px;
+        }
+
+        .page-number.right {
+            right: 32px;
+        }
+
+        .page-content h1 {
+            font-size: 28px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .page-content p {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 16px;
+            color: var(--md-sys-color-on-surface);
+            text-align: justify;
+        }
+
+        /* Right Sidebar */
+        .right-sidebar {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--md-sys-color-surface-variant);
+            border-left: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        /* Controls Panel - Dynamic */
+        .controls-panel {
+            flex: 0 0 auto;
+            padding: 16px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            background-color: white;
+            overflow-y: auto;
+            transition: flex-basis 0.3s ease;
+        }
+
+        .controls-panel h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+        }
+
+        .control-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .md-button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 20px;
+            background-color: var(--md-sys-color-primary);
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .md-button:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .md-button.outlined {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .md-button.outlined:hover {
+            background-color: rgba(216, 27, 96, 0.08);
+        }
+
+        /* Slider */
+        .slider-container {
+            margin-top: 8px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--md-sys-color-outline-variant);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--md-sys-color-primary);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--md-sys-color-primary);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border: none;
+        }
+
+        .md-select {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 8px;
+            background-color: white;
+            color: var(--md-sys-color-on-surface);
+            font-size: 14px;
+            font-family: 'Roboto', sans-serif;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .md-select:focus {
+            border-color: var(--md-sys-color-primary);
+        }
+
+        .md-select:hover {
+            border-color: var(--md-sys-color-on-surface-variant);
+        }
+
+        /* AI Chat Window - Remaining space */
+        .chat-window {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            background-color: var(--md-sys-color-surface-variant);
+            flex-shrink: 0;
+        }
+
+        .chat-header h3 {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chat-messages {
+            flex: 1 1 auto;
+            padding: 16px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 0;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--md-sys-color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background-color: var(--md-sys-color-outline);
+        }
+
+        .message-bubble {
+            background-color: var(--md-sys-color-surface-variant);
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-bubble {
+            background-color: var(--md-sys-color-primary);
+            color: white;
+        }
+
+        .message-bubble .hashtag {
+            display: inline-block;
+            padding: 2px 8px;
+            margin: 0 2px;
+            border: 1.5px solid var(--md-sys-color-primary);
+            border-radius: 10px;
+            background-color: rgba(216, 27, 96, 0.05);
+            color: var(--md-sys-color-primary);
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .message.user .message-bubble .hashtag {
+            border-color: white;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .chat-input {
+            padding: 12px 16px;
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            display: flex;
+            gap: 12px;
+            background-color: var(--md-sys-color-surface-variant);
+            flex-shrink: 0;
+        }
+
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .ghost-text {
+            position: absolute;
+            left: 0;
+            top: 0;
+            padding: 12px 16px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-family: 'Roboto', sans-serif;
+            color: transparent;
+            pointer-events: none;
+            white-space: nowrap;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .ghost-text span {
+            color: rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-input input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 24px;
+            font-size: 14px;
+            font-family: 'Roboto', sans-serif;
+            outline: none;
+            transition: border-color 0.2s ease;
+            background: transparent;
+            position: relative;
+            z-index: 2;
+        }
+
+        .chat-input input:focus {
+            border-color: var(--md-sys-color-primary);
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 8px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.highlighted {
+            background-color: var(--md-sys-color-surface-variant);
+        }
+
+        .autocomplete-item .tag-name {
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+        }
+
+        .autocomplete-item .tag-category {
+            font-size: 11px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-left: 8px;
+        }
+
+        .chat-input button {
+            padding: 12px 24px;
+            background-color: var(--md-sys-color-primary);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .chat-input button:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--md-sys-color-surface-variant);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--md-sys-color-outline);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--md-sys-color-on-surface-variant);
+        }
+
+        .slider-value {
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-top: 4px;
+        }
+
+        .slider-description {
+            font-size: 11px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-top: 4px;
+            line-height: 1.4;
+            font-style: italic;
+        }
+
+        .advanced-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            margin: 8px 0;
+            background-color: var(--md-sys-color-surface-variant);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
+        }
+
+        .advanced-toggle:hover {
+            background-color: rgba(216, 27, 96, 0.08);
+        }
+
+        .advanced-toggle .material-icons {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .advanced-toggle.expanded .material-icons {
+            transform: rotate(180deg);
+        }
+
+        .advanced-options {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        .advanced-options.show {
+            max-height: 400px;
+        }
+
+        .advanced-options-content {
+            padding-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar - Tags -->
+        <div class="tags-sidebar">
+            <h2>Browse Tags</h2>
+            
+            <div class="tag-category">
+                <div class="tag-category-title" onclick="toggleCategory(this)">
+                    <span>Steam Level</span>
+                    <span class="material-icons">expand_more</span>
+                </div>
+                <div class="tag-category-content">
+                    <div class="tag" data-tag="glimpses-kisses">Glimpses & Kisses</div>
+                    <div class="tag" data-tag="behind-closed-doors">Behind Closed Doors</div>
+                    <div class="tag" data-tag="open-door">Open Door</div>
+                    <div class="tag" data-tag="explicit-open-door">Explicit Open Door</div>
+                    <div class="tag" data-tag="explicit-plentiful">Explicit & Plentiful</div>
+                </div>
+            </div>
+
+            <div class="tag-category">
+                <div class="tag-category-title" onclick="toggleCategory(this)">
+                    <span>Genre</span>
+                    <span class="material-icons">expand_more</span>
+                </div>
+                <div class="tag-category-content">
+                    <div class="tag" data-tag="contemporary">Contemporary</div>
+                    <div class="tag" data-tag="fantasy">Fantasy</div>
+                    <div class="tag" data-tag="paranormal">Paranormal</div>
+                    <div class="tag" data-tag="historical">Historical</div>
+                    <div class="tag" data-tag="dark-romance">Dark Romance</div>
+                    <div class="tag" data-tag="young-adult">Young Adult</div>
+                    <div class="tag" data-tag="new-adult">New Adult</div>
+                    <div class="tag" data-tag="mystery">Mystery</div>
+                    <div class="tag" data-tag="suspense">Suspense</div>
+                </div>
+            </div>
+
+            <div class="tag-category">
+                <div class="tag-category-title" onclick="toggleCategory(this)">
+                    <span>Paranormal</span>
+                    <span class="material-icons">expand_more</span>
+                </div>
+                <div class="tag-category-content">
+                    <div class="tag" data-tag="vampires">Vampires</div>
+                    <div class="tag" data-tag="werewolves">Werewolves</div>
+                    <div class="tag" data-tag="dragon-shifters">Dragon Shifters</div>
+                    <div class="tag" data-tag="fae">Fae</div>
+                    <div class="tag" data-tag="witches">Witches</div>
+                    <div class="tag" data-tag="angels">Angels</div>
+                    <div class="tag" data-tag="demons">Demons</div>
+                </div>
+            </div>
+
+            <div class="tag-category">
+                <div class="tag-category-title" onclick="toggleCategory(this)">
+                    <span>Story Tropes</span>
+                    <span class="material-icons">expand_more</span>
+                </div>
+                <div class="tag-category-content">
+                    <div class="tag" data-tag="enemies-to-lovers">Enemies to Lovers</div>
+                    <div class="tag" data-tag="friends-to-lovers">Friends to Lovers</div>
+                    <div class="tag" data-tag="second-chance">Second Chance</div>
+                    <div class="tag" data-tag="fake-dating">Fake Dating</div>
+                    <div class="tag" data-tag="forced-proximity">Forced Proximity</div>
+                    <div class="tag" data-tag="alpha-male">Alpha Male</div>
+                    <div class="tag" data-tag="grumpy-sunshine">Grumpy Sunshine</div>
+                    <div class="tag" data-tag="forbidden-romance">Forbidden Romance</div>
+                </div>
+            </div>
+
+            <div class="tag-category collapsed">
+                <div class="tag-category-title" onclick="toggleCategory(this)">
+                    <span>Time Period</span>
+                    <span class="material-icons">expand_more</span>
+                </div>
+                <div class="tag-category-content">
+                    <div class="tag" data-tag="regency">Regency</div>
+                    <div class="tag" data-tag="victorian">Victorian</div>
+                    <div class="tag" data-tag="medieval">Medieval</div>
+                    <div class="tag" data-tag="western-frontier">Western Frontier</div>
+                </div>
+            </div>
+
+            <div class="tag-category collapsed">
+                <div class="tag-category-title" onclick="toggleCategory(this)">
+                    <span>Location</span>
+                    <span class="material-icons">expand_more</span>
+                </div>
+                <div class="tag-category-content">
+                    <div class="tag" data-tag="small-town">Small Town</div>
+                    <div class="tag" data-tag="college">College</div>
+                    <div class="tag" data-tag="workplace">Workplace</div>
+                    <div class="tag" data-tag="royal-court">Royal Court</div>
+                </div>
+            </div>
+
+            <div class="tag-category collapsed">
+                <div class="tag-category-title" onclick="toggleCategory(this)">
+                    <span>Relationship</span>
+                    <span class="material-icons">expand_more</span>
+                </div>
+                <div class="tag-category-content">
+                    <div class="tag" data-tag="m-f-romance">M-F Romance</div>
+                    <div class="tag" data-tag="m-m-romance">M-M Romance</div>
+                    <div class="tag" data-tag="f-f-romance">F-F Romance</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle - Book Reader -->
+        <div class="book-reader">
+            <div class="book-spread">
+                <div class="book-page left">
+                    <div class="page-content">
+                        <h1>Chapter One</h1>
+                        <p>The storm had arrived without warning, just like everything else in her life lately. Emma stood at the window of her small apartment, watching sheets of rain cascade down the glass, distorting the city lights below into dancing ribbons of color.</p>
+                        <p>She hadn't expected to see him again. Not here, not now. Not after all these years of carefully avoiding every place that might hold even a whisper of his memory.</p>
+                        <p>But there he was this morning, standing in the conference room like he owned the place—which, she'd quickly learned, he practically did. The new CEO. Her new boss.</p>
+                        <p>Of course.</p>
+                        <p>Her phone buzzed on the coffee table, pulling her from her thoughts. Another message from her sister, no doubt asking if she was okay after the bombshell of the day. She wasn't ready to talk about it yet. Wasn't ready to admit that seeing</p>
+                    </div>
+                    <div class="page-number left">24</div>
+                </div>
+
+                <div class="book-page right">
+                    <div class="page-content">
+                        <p>Marcus again had shattered the careful composure she'd built over the past five years.</p>
+                        <p>The way he'd looked at her—like no time had passed at all, like they were still those two people who couldn't keep their hands off each other—had made her heart race in a way that was both familiar and terrifying.</p>
+                        <p>"Emma Chen," he'd said, his voice deeper than she remembered, rougher around the edges. "I was hoping I'd find you here."</p>
+                        <p>Hoping. As if this was some happy coincidence and not the universe playing a cosmic joke at her expense.</p>
+                        <p>She turned away from the window and picked up her phone, thumbing through her sister's messages without really reading them. Tomorrow she'd have to face him again. Tomorrow she'd have to pretend that working with him wouldn't be the hardest thing she'd ever done.</p>
+                        <p>Tomorrow she'd have to remember why she'd left him in the first place.</p>
+                    </div>
+                    <div class="page-number right">25</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <!-- Controls Panel (25%) -->
+            <div class="controls-panel">
+                <h3>Reading Options</h3>
+                
+                <!-- Priority Controls - Always Visible -->
+                <div class="control-group">
+                    <span class="control-label">Abruptness</span>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="abruptnessSlider">
+                        <div class="slider-value" id="abruptnessValue">Moderate</div>
+                        <div class="slider-description" id="abruptnessDescription">Story changes blend naturally over several pages</div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <span class="control-label">Spice Level</span>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="spiceSlider">
+                        <div class="slider-value" id="spiceValue">🌶️🌶️🌶️<br>Open Door</div>
+                    </div>
+                </div>
+
+                <!-- Advanced Options - Collapsible -->
+                <div class="advanced-toggle" onclick="toggleAdvancedOptions()">
+                    <span id="advancedToggleText">Show Advanced Options</span>
+                    <span class="material-icons" id="advancedToggleIcon">expand_more</span>
+                </div>
+
+                <div class="advanced-options" id="advancedOptions">
+                    <div class="advanced-options-content">
+                        <div class="control-group">
+                            <span class="control-label">Words Per Page</span>
+                            <div class="button-group">
+                                <button class="md-button outlined" onclick="setWordsPerPage(250)">250</button>
+                                <button class="md-button" onclick="setWordsPerPage(500)">500</button>
+                                <button class="md-button outlined" onclick="setWordsPerPage(750)">750</button>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <span class="control-label">Chunk Size</span>
+                            <div class="button-group">
+                                <button class="md-button" onclick="setChunkSize(3)">3 pages</button>
+                                <button class="md-button outlined" onclick="setChunkSize(10)">10 pages</button>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <span class="control-label">AI Model</span>
+                            <select class="md-select" id="modelSelector">
+                                <option value="gpt4">GPT-4</option>
+                                <option value="claude">Claude</option>
+                                <option value="gemini">Gemini</option>
+                                <option value="mistral">Mistral</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Chat Window (75%) -->
+            <div class="chat-window">
+                <div class="chat-header">
+                    <h3>
+                        <span class="material-icons" style="font-size: 20px;">smart_toy</span>
+                        AI Reading Assistant
+                    </h3>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message ai">
+                        <div class="message-avatar">AI</div>
+                        <div class="message-bubble">
+                            Give me instructions for how you want the story to evolve. You can request certain kinds of scenes, switch perspectives, or add in new <span class="hashtag">#tags</span>
+                        </div>
+                    </div>
+                    
+                    <div class="message user">
+                        <div class="message-avatar">ME</div>
+                        <div class="message-bubble">
+                            This story needs more <span class="hashtag">#Werewolves</span>. Add them in gradually.
+                        </div>
+                    </div>
+                    
+                    <div class="message ai">
+                        <div class="message-avatar">AI</div>
+                        <div class="message-bubble">
+                            Will do!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input">
+                    <div style="position: relative; flex: 1;">
+                        <div class="input-wrapper">
+                            <div class="ghost-text" id="ghostText"></div>
+                            <input type="text" placeholder="Shape the story..." id="chatInput">
+                        </div>
+                        <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                    </div>
+                    <button onclick="sendMessage()">
+                        <span class="material-icons" style="font-size: 18px;">send</span>
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Category toggle
+        function toggleCategory(element) {
+            const category = element.parentElement;
+            category.classList.toggle('collapsed');
+        }
+
+        // Tag selection - Insert into chat input
+        document.querySelectorAll('.tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                const tagName = this.dataset.tag;
+                const chatInput = document.getElementById('chatInput');
+                const currentValue = chatInput.value;
+                
+                // Add hashtag to input
+                if (currentValue && !currentValue.endsWith(' ')) {
+                    chatInput.value = currentValue + ' #' + tagName + ' ';
+                } else {
+                    chatInput.value = currentValue + '#' + tagName + ' ';
+                }
+                
+                // Focus the input
+                chatInput.focus();
+                
+                // Visual feedback
+                this.classList.add('active');
+                setTimeout(() => {
+                    this.classList.remove('active');
+                }, 300);
+            });
+        });
+
+        // Toggle advanced options
+        function toggleAdvancedOptions() {
+            const advancedOptions = document.getElementById('advancedOptions');
+            const toggleText = document.getElementById('advancedToggleText');
+            const toggleIcon = document.getElementById('advancedToggleIcon');
+            const toggle = document.querySelector('.advanced-toggle');
+            
+            advancedOptions.classList.toggle('show');
+            toggle.classList.toggle('expanded');
+            
+            if (advancedOptions.classList.contains('show')) {
+                toggleText.textContent = 'Hide Advanced Options';
+            } else {
+                toggleText.textContent = 'Show Advanced Options';
+            }
+        }
+
+        // Words per page setting
+        let currentWordsPerPage = 500;
+        function setWordsPerPage(words) {
+            currentWordsPerPage = words;
+            // Update button states
+            document.querySelectorAll('.control-group:nth-child(1) .md-button').forEach(btn => {
+                btn.classList.remove('md-button');
+                btn.classList.add('md-button', 'outlined');
+            });
+            event.target.classList.remove('outlined');
+            console.log('Words per page set to:', words);
+        }
+
+        // Chunk size setting
+        let currentChunkSize = 3;
+        function setChunkSize(pages) {
+            currentChunkSize = pages;
+            // Update button states
+            document.querySelectorAll('.control-group:nth-child(2) .md-button').forEach(btn => {
+                btn.classList.remove('md-button');
+                btn.classList.add('md-button', 'outlined');
+            });
+            event.target.classList.remove('outlined');
+            console.log('Chunk size set to:', pages, 'pages');
+        }
+
+        // Spice level slider
+        const spiceSlider = document.getElementById('spiceSlider');
+        const spiceValue = document.getElementById('spiceValue');
+        const spiceLabels = ['🌶️', '🌶️🌶️', '🌶️🌶️🌶️', '🌶️🌶️🌶️🌶️', '🌶️🌶️🌶️🌶️🌶️'];
+        const spiceNames = [
+            'Glimpses and Kisses',
+            'Behind Closed Doors', 
+            'Open Door',
+            'Explicit Open Door',
+            'Explicit and Plentiful'
+        ];
+
+        spiceSlider.addEventListener('input', function() {
+            const level = parseInt(this.value);
+            spiceValue.innerHTML = spiceLabels[level - 1] + '<br>' + spiceNames[level - 1];
+            console.log('Spice level set to:', spiceNames[level - 1]);
+        });
+
+        // Model selector
+        document.getElementById('modelSelector').addEventListener('change', function() {
+            console.log('Model changed to:', this.value);
+        });
+
+        // Abruptness slider
+        const abruptnessSlider = document.getElementById('abruptnessSlider');
+        const abruptnessValue = document.getElementById('abruptnessValue');
+        const abruptnessDescription = document.getElementById('abruptnessDescription');
+        const abruptnessLevels = [
+            { name: 'Very Gradual', description: 'Story changes unfold slowly over many pages with subtle hints' },
+            { name: 'Gradual', description: 'Changes develop naturally with clear foreshadowing' },
+            { name: 'Moderate', description: 'Story changes blend naturally over several pages' },
+            { name: 'Quick', description: 'Changes happen within a page or two with minimal transition' },
+            { name: 'Immediate', description: 'Story shifts happen right away in the next scene' }
+        ];
+
+        abruptnessSlider.addEventListener('input', function() {
+            const level = parseInt(this.value) - 1;
+            abruptnessValue.textContent = abruptnessLevels[level].name;
+            abruptnessDescription.textContent = abruptnessLevels[level].description;
+            console.log('Abruptness set to:', abruptnessLevels[level].name);
+        });
+
+        // Hashtag autocomplete
+        const allTags = [
+            { tag: 'explicit-open-door', category: 'Steam Level' },
+            { tag: 'open-door', category: 'Steam Level' },
+            { tag: 'behind-closed-doors', category: 'Steam Level' },
+            { tag: 'glimpses-and-kisses', category: 'Steam Level' },
+            { tag: 'explicit-and-plentiful', category: 'Steam Level' },
+            { tag: 'contemporary', category: 'Genre' },
+            { tag: 'fantasy', category: 'Genre' },
+            { tag: 'paranormal', category: 'Genre' },
+            { tag: 'historical', category: 'Genre' },
+            { tag: 'dark-romance', category: 'Genre' },
+            { tag: 'regency', category: 'Time Period' },
+            { tag: 'victorian', category: 'Time Period' },
+            { tag: 'medieval', category: 'Time Period' },
+            { tag: 'enemies-to-lovers', category: 'Story Trope' },
+            { tag: 'friends-to-lovers', category: 'Story Trope' },
+            { tag: 'second-chance', category: 'Story Trope' },
+            { tag: 'fake-dating', category: 'Story Trope' },
+            { tag: 'forced-proximity', category: 'Story Trope' },
+            { tag: 'alpha-male', category: 'Story Trope' },
+            { tag: 'grumpy-sunshine', category: 'Story Trope' },
+            { tag: 'small-town', category: 'Location' },
+            { tag: 'college', category: 'Location' },
+            { tag: 'workplace', category: 'Location' },
+            { tag: 'royal-court', category: 'Location' }
+        ];
+
+        const chatInput = document.getElementById('chatInput');
+        const autocompleteDropdown = document.getElementById('autocompleteDropdown');
+        const ghostText = document.getElementById('ghostText');
+        let currentSuggestion = null;
+        let lastHashIndex = -1;
+
+        function updateGhostText(value, cursorPos, suggestion) {
+            if (!suggestion) {
+                ghostText.innerHTML = '';
+                return;
+            }
+
+            const textBeforeCursor = value.substring(0, cursorPos);
+            const searchTerm = textBeforeCursor.substring(lastHashIndex + 1);
+            
+            // Create ghost text showing the completion
+            const beforeHash = value.substring(0, lastHashIndex + 1);
+            const completion = suggestion.substring(searchTerm.length);
+            
+            ghostText.innerHTML = beforeHash + searchTerm + '<span>' + completion + '</span>';
+        }
+
+        function acceptSuggestion() {
+            if (!currentSuggestion) return false;
+            
+            const value = chatInput.value;
+            const cursorPos = chatInput.selectionStart;
+            const textBeforeCursor = value.substring(0, cursorPos);
+            const searchTerm = textBeforeCursor.substring(lastHashIndex + 1);
+            const beforeHash = value.substring(0, lastHashIndex);
+            const afterCursor = value.substring(cursorPos);
+            
+            chatInput.value = beforeHash + '#' + currentSuggestion + ' ' + afterCursor;
+            const newCursorPos = beforeHash.length + currentSuggestion.length + 2;
+            chatInput.setSelectionRange(newCursorPos, newCursorPos);
+            
+            autocompleteDropdown.classList.remove('show');
+            ghostText.innerHTML = '';
+            currentSuggestion = null;
+            
+            return true;
+        }
+
+        chatInput.addEventListener('input', function(e) {
+            const value = this.value;
+            const cursorPos = this.selectionStart;
+            
+            // Find the last # before cursor
+            const textBeforeCursor = value.substring(0, cursorPos);
+            lastHashIndex = textBeforeCursor.lastIndexOf('#');
+            
+            if (lastHashIndex !== -1) {
+                const searchTerm = textBeforeCursor.substring(lastHashIndex + 1).toLowerCase();
+                
+                // Check if there's a space after the hash (then we're not autocompleting anymore)
+                if (searchTerm.includes(' ')) {
+                    autocompleteDropdown.classList.remove('show');
+                    ghostText.innerHTML = '';
+                    currentSuggestion = null;
+                    return;
+                }
+                
+                // Filter tags
+                const matches = allTags.filter(item => 
+                    item.tag.toLowerCase().startsWith(searchTerm) ||
+                    item.category.toLowerCase().includes(searchTerm)
+                ).slice(0, 8);
+                
+                if (matches.length > 0) {
+                    currentSuggestion = matches[0].tag;
+                    updateGhostText(value, cursorPos, currentSuggestion);
+                    
+                    autocompleteDropdown.innerHTML = matches.map((item, index) => 
+                        `<div class="autocomplete-item ${index === 0 ? 'highlighted' : ''}" data-tag="${item.tag}">
+                            <span class="tag-name">#${item.tag}</span>
+                            <span class="tag-category">${item.category}</span>
+                        </div>`
+                    ).join('');
+                    autocompleteDropdown.classList.add('show');
+                    
+                    // Add click handlers
+                    autocompleteDropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            const tag = this.dataset.tag;
+                            const beforeHash = value.substring(0, lastHashIndex);
+                            const afterCursor = value.substring(cursorPos);
+                            chatInput.value = beforeHash + '#' + tag + ' ' + afterCursor;
+                            autocompleteDropdown.classList.remove('show');
+                            ghostText.innerHTML = '';
+                            currentSuggestion = null;
+                            chatInput.focus();
+                        });
+                    });
+                } else {
+                    autocompleteDropdown.classList.remove('show');
+                    ghostText.innerHTML = '';
+                    currentSuggestion = null;
+                }
+            } else {
+                autocompleteDropdown.classList.remove('show');
+                ghostText.innerHTML = '';
+                currentSuggestion = null;
+            }
+        });
+
+        // Handle Tab key for accepting suggestions
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab' && currentSuggestion) {
+                e.preventDefault();
+                acceptSuggestion();
+            }
+        });
+
+        // Close autocomplete when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!chatInput.contains(e.target) && !autocompleteDropdown.contains(e.target)) {
+                autocompleteDropdown.classList.remove('show');
+                ghostText.innerHTML = '';
+                currentSuggestion = null;
+            }
+        });
+
+        // Format text with hashtags
+        function formatHashtags(text) {
+            // Replace #hashtag with styled span
+            return text.replace(/#(\w+(?:-\w+)*)/g, '<span class="hashtag">#$1</span>');
+        }
+
+        // Chat functionality
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            if (input.value.trim() === '') return;
+            
+            const messageText = input.value;
+            const hasHashtag = messageText.includes('#');
+            const formattedText = formatHashtags(messageText);
+            
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.innerHTML = `
+                <div class="message-avatar">ME</div>
+                <div class="message-bubble">${formattedText}</div>
+            `;
+            messagesContainer.appendChild(userMessage);
+            
+            // Simulate AI response
+            setTimeout(() => {
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'message ai';
+                
+                let responseText = '';
+                if (hasHashtag) {
+                    responseText = "I'd weave that into the story. Adjust the abruptness slider to change how quickly I shift.";
+                } else {
+                    responseText = "That's an interesting direction for the story! I can help guide the narrative in that direction. Feel free to add <span class=\"hashtag\">#tags</span> to specify genres, tropes, or other elements you'd like to see.";
+                }
+                
+                aiMessage.innerHTML = `
+                    <div class="message-avatar">AI</div>
+                    <div class="message-bubble">${responseText}</div>
+                `;
+                messagesContainer.appendChild(aiMessage);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 1000);
+            
+            input.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Allow Enter key to send message
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
